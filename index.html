@@ -19,10 +19,19 @@
             background: linear-gradient(180deg, rgba(15, 23, 42, 0.96) 0%, rgba(3, 7, 6, 0.99) 100%);
         }
 
-        .custom-checkbox { 
+        /* Checkbox do Caique (Verde) */
+        .checkbox-caique { 
             width: 1.4rem; 
             height: 1.4rem; 
             accent-color: #10b981; 
+            cursor: pointer; 
+        }
+
+        /* Checkbox da Carina (Vermelho Feiticeira Escarlate) */
+        .checkbox-carina { 
+            width: 1.4rem; 
+            height: 1.4rem; 
+            accent-color: #e11d48; 
             cursor: pointer; 
         }
 
@@ -38,8 +47,8 @@
             color: #d1fae5 !important;
         }
 
-        /* Partícula mágica */
-        .spell-spark {
+        /* Partícula mágica do Caique (Verde) */
+        .spell-spark-caique {
             position: fixed;
             pointer-events: none;
             width: 8px;
@@ -47,6 +56,19 @@
             background: #10b981;
             border-radius: 50%;
             box-shadow: 0 0 12px #10b981, 0 0 20px #34d399;
+            z-index: 9999;
+            animation: spark-fade 0.8s ease-out forwards;
+        }
+
+        /* Partícula mágica da Carina (Vermelho Feiticeira Escarlate) */
+        .spell-spark-carina {
+            position: fixed;
+            pointer-events: none;
+            width: 8px;
+            height: 8px;
+            background: #e11d48;
+            border-radius: 50%;
+            box-shadow: 0 0 12px #e11d48, 0 0 20px #fb7185;
             z-index: 9999;
             animation: spark-fade 0.8s ease-out forwards;
         }
@@ -62,18 +84,15 @@
     <!-- TELA DE LOGIN PRIVADA -->
     <div id="auth-screen" class="fixed inset-0 bg-slate-950/95 backdrop-blur-md z-50 flex items-center justify-center p-4">
         <div class="auth-card border border-rose-900/60 rounded-3xl max-w-sm w-full shadow-2xl text-center relative overflow-hidden p-6">
-            <!-- Imagem da Feiticeira Escarlate -->
             <div class="relative w-32 h-32 mx-auto mb-4 rounded-full overflow-hidden border-2 border-rose-600 shadow-[0_0_25px_rgba(225,29,72,0.7)]">
-                <img src="feiticeira.png" alt="Feiticeira Escarlate" class="w-full h-full object-cover object-top">
+                <img src="https://images.unsplash.com/photo-1635863138275-d9b3329feb55?q=80&w=600&auto=format&fit=crop" alt="Feiticeira Escarlate" class="w-full h-full object-cover object-top">
             </div>
             
             <h2 class="text-xl font-bold mb-1 text-slate-100">Área Restrita</h2>
             <p class="text-xs tracking-widest uppercase text-rose-400 mb-6 font-semibold">Caique & Carina</p>
             
             <input type="password" id="password-input" placeholder="Digite a senha..." class="w-full bg-slate-950/90 border border-slate-700 rounded-xl px-4 py-3 text-center text-lg mb-4 text-emerald-400 focus:outline-none focus:border-emerald-500 shadow-inner">
-            <button onclick="checkPassword()" class="w-full bg-gradient-to-r from-rose-700 via-emerald-800 to-emerald-600 hover:opacity-90 text-white font-bold py-3 rounded-xl transition shadow-lg shadow-emerald-950/50 cursor-pointer">"Você quebra as regras e se torna um herói. Eu faço isso e me torno o inimigo. Isso não parece justo."
-CLIQUE AQUI
-</button>
+            <button onclick="checkPassword()" class="w-full bg-gradient-to-r from-rose-700 via-emerald-800 to-emerald-600 hover:opacity-90 text-white font-bold py-3 rounded-xl transition shadow-lg shadow-emerald-950/50 cursor-pointer">Invocação Mística</button>
             <p id="error-msg" class="text-rose-400 text-xs mt-3 hidden">Acesso negado. Feitiço incorreto.</p>
         </div>
     </div>
@@ -81,13 +100,19 @@ CLIQUE AQUI
     <!-- PAINEL PRINCIPAL -->
     <div id="app-content" class="opacity-0 transition-opacity duration-700 max-w-6xl mx-auto px-4 pt-6">
         
-        <!-- Header -->
-        <header class="text-center mb-6 bg-slate-900/80 border border-emerald-900/60 p-5 rounded-2xl backdrop-blur-md shadow-2xl relative overflow-hidden">
-            <span class="text-xs uppercase tracking-widest text-emerald-400 font-semibold">Cronograma de Acompanhamento MCU</span>
-            <h1 class="text-2xl md:text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-teal-200 to-emerald-500 mt-1">
-                AVENGERS: DOOMSDAY
-            </h1>
-            <p class="text-xs text-slate-300 mt-1">Caique & Carina | Estreia: 17/12/2026</p>
+        <!-- Header com Botão de Salvar -->
+        <header class="text-center mb-6 bg-slate-900/80 border border-emerald-900/60 p-5 rounded-2xl backdrop-blur-md shadow-2xl relative overflow-hidden flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div class="text-center sm:text-left">
+                <span class="text-xs uppercase tracking-widest text-emerald-400 font-semibold">Cronograma de Acompanhamento MCU</span>
+                <h1 class="text-2xl md:text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-teal-200 to-emerald-500 mt-1">
+                    AVENGERS: DOOMSDAY
+                </h1>
+                <p class="text-xs text-slate-300 mt-1">Caique & Carina | Estreia: 17/12/2026</p>
+            </div>
+            <!-- Botão de Salvamento Manual -->
+            <button onclick="manualSave()" class="bg-gradient-to-r from-emerald-600 to-teal-600 hover:opacity-90 text-white text-xs font-bold px-4 py-2.5 rounded-xl shadow-lg transition cursor-pointer border border-emerald-400/30 flex items-center gap-2">
+                💾 Salvar Progresso
+            </button>
         </header>
 
         <!-- Container Flexível: Doctor Doom (Esquerda) | Tabela (Centro) | Bruxas (Direita) -->
@@ -95,9 +120,8 @@ CLIQUE AQUI
             
             <!-- LATERAL ESQUERDA: DOCTOR DOOM -->
             <div class="hidden lg:block lg:col-span-3 bg-slate-900/80 border border-emerald-900/50 rounded-2xl p-4 text-center backdrop-blur-md shadow-xl sticky top-6">
-                <!-- Salve a imagem do Doctor Doom na mesma pasta com o nome doctor-doom.png -->
                 <div class="w-full h-80 rounded-xl overflow-hidden mb-3 border border-emerald-700/40 shadow-lg">
-                    <img src="doctor-doom.png" alt="Doctor Doom" class="w-full h-full object-cover object-top">
+                    <img src="https://images.unsplash.com/photo-1579783902614-a3fb3927b675?q=80&w=600&auto=format&fit=crop" alt="Doctor Doom" class="w-full h-full object-cover object-top">
                 </div>
                 <h3 class="text-sm font-bold text-emerald-400 uppercase tracking-wider">Doctor Doom</h3>
                 <p class="text-xs text-slate-400 mt-1">O soberano da Latvéria comanda o Multiverso.</p>
@@ -118,12 +142,12 @@ CLIQUE AQUI
                         </div>
                     </div>
                     <div class="bg-slate-900/90 border border-slate-800 p-3.5 rounded-xl shadow-lg backdrop-blur-sm">
-                        <div class="flex justify-between text-xs mb-1 font-medium text-teal-400">
+                        <div class="flex justify-between text-xs mb-1 font-medium text-rose-400">
                             <span>Carina</span>
                             <span id="carina-pct">0%</span>
                         </div>
                         <div class="w-full bg-slate-800 h-2 rounded-full overflow-hidden">
-                            <div id="carina-bar" class="bg-teal-500 h-2 transition-all duration-500" style="width: 0%"></div>
+                            <div id="carina-bar" class="bg-rose-500 h-2 transition-all duration-500" style="width: 0%"></div>
                         </div>
                     </div>
                 </div>
@@ -138,7 +162,7 @@ CLIQUE AQUI
                                     <th class="p-3 text-center">Data</th>
                                     <th class="p-3">Título</th>
                                     <th class="p-3 text-center text-emerald-400">Caique</th>
-                                    <th class="p-3 text-center text-teal-400">Carina</th>
+                                    <th class="p-3 text-center text-rose-400">Carina</th>
                                 </tr>
                             </thead>
                             <tbody id="checklist-body" class="divide-y divide-slate-800/40 text-xs sm:text-sm">
@@ -167,15 +191,20 @@ CLIQUE AQUI
     <script>
         const SECRET_PASSWORD = "mamãetaon";
 
-        function playSpellSound() {
+        function playSpellSound(user) {
             try {
                 const ctx = new (window.AudioContext || window.webkitAudioContext)();
                 const osc = ctx.createOscillator();
                 const gain = ctx.createGain();
 
                 osc.type = 'sine';
-                osc.frequency.setValueAtTime(350, ctx.currentTime);
-                osc.frequency.exponentialRampToValueAtTime(880, ctx.currentTime + 0.3);
+                if(user === 'carina') {
+                    osc.frequency.setValueAtTime(450, ctx.currentTime);
+                    osc.frequency.exponentialRampToValueAtTime(950, ctx.currentTime + 0.3);
+                } else {
+                    osc.frequency.setValueAtTime(350, ctx.currentTime);
+                    osc.frequency.exponentialRampToValueAtTime(880, ctx.currentTime + 0.3);
+                }
 
                 gain.gain.setValueAtTime(0.3, ctx.currentTime);
                 gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.35);
@@ -188,14 +217,14 @@ CLIQUE AQUI
             } catch(e){}
         }
 
-        function triggerSpellEffect(e) {
-            playSpellSound();
+        function triggerSpellEffect(e, user) {
+            playSpellSound(user);
             const x = e.clientX || window.innerWidth / 2;
             const y = e.clientY || window.innerHeight / 2;
 
             for (let i = 0; i < 10; i++) {
                 const spark = document.createElement('div');
-                spark.className = 'spell-spark';
+                spark.className = (user === 'carina') ? 'spell-spark-carina' : 'spell-spark-caique';
                 spark.style.left = x + 'px';
                 spark.style.top = y + 'px';
 
@@ -212,7 +241,7 @@ CLIQUE AQUI
         function checkPassword() {
             const val = document.getElementById('password-input').value;
             if(val === SECRET_PASSWORD) {
-                playSpellSound();
+                playSpellSound('caique');
                 document.getElementById('auth-screen').style.display = 'none';
                 const app = document.getElementById('app-content');
                 app.classList.remove('opacity-0');
@@ -264,7 +293,7 @@ CLIQUE AQUI
             const tbody = document.getElementById('checklist-body');
             tbody.innerHTML = '';
 
-            items.items?.forEach?.((item, index) => {}) || items.forEach((item, index) => {
+            items.forEach((item, index) => {
                 let caiqueChecked = localStorage.getItem(`caique_${index}`) === 'true';
                 let carinaChecked = localStorage.getItem(`carina_${index}`) === 'true';
 
@@ -277,10 +306,10 @@ CLIQUE AQUI
                     <td class="p-2.5 text-center text-slate-400 text-xs">${item.date}</td>
                     <td class="p-2.5 text-slate-200">${item.title}</td>
                     <td class="p-2.5 text-center">
-                        <input type="checkbox" class="custom-checkbox" ${caiqueChecked ? 'checked' : ''} onchange="saveProgress(event, ${index}, 'caique', this.checked)">
+                        <input type="checkbox" class="checkbox-caique" ${caiqueChecked ? 'checked' : ''} onchange="saveProgress(event, ${index}, 'caique', this.checked)">
                     </td>
                     <td class="p-2.5 text-center">
-                        <input type="checkbox" class="custom-checkbox" ${carinaChecked ? 'checked' : ''} onchange="saveProgress(event, ${index}, 'carina', this.checked)">
+                        <input type="checkbox" class="checkbox-carina" ${carinaChecked ? 'checked' : ''} onchange="saveProgress(event, ${index}, 'carina', this.checked)">
                     </td>
                 `;
                 tbody.appendChild(tr);
@@ -291,7 +320,7 @@ CLIQUE AQUI
         function saveProgress(e, index, user, status) {
             localStorage.setItem(`${user}_${index}`, status);
             
-            if (status) triggerSpellEffect(e);
+            if (status) triggerSpellEffect(e, user);
 
             let caiqueChecked = localStorage.getItem(`caique_${index}`) === 'true';
             let carinaChecked = localStorage.getItem(`carina_${index}`) === 'true';
@@ -304,6 +333,10 @@ CLIQUE AQUI
             }
 
             updateProgress();
+        }
+
+        function manualSave() {
+            alert("✨ Progresso salvo com sucesso neste aparelho!");
         }
 
         function updateProgress() {
