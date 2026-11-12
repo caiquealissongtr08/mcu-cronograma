@@ -85,7 +85,7 @@
     <div id="auth-screen" class="fixed inset-0 bg-slate-950/95 backdrop-blur-md z-50 flex items-center justify-center p-4">
         <div class="auth-card border border-rose-900/60 rounded-3xl max-w-sm w-full shadow-2xl text-center relative overflow-hidden p-6">
             <div class="relative w-32 h-32 mx-auto mb-4 rounded-full overflow-hidden border-2 border-rose-600 shadow-[0_0_25px_rgba(225,29,72,0.7)]">
-                <img src="https://images.unsplash.com/photo-1635863138275-d9b3329feb55?q=80&w=600&auto=format&fit=crop" alt="Feiticeira Escarlate" class="w-full h-full object-cover object-top">
+                <img src="https://i.ibb.co/6R228J5/feiticeira.jpg" alt="Feiticeira Escarlate" class="w-full h-full object-cover object-top" onerror="this.src='https://images.unsplash.com/photo-1534447677768-be436bb09401?q=80&w=400&auto=format&fit=crop'">
             </div>
             
             <h2 class="text-xl font-bold mb-1 text-slate-100">Área Restrita</h2>
@@ -121,7 +121,7 @@
             <!-- LATERAL ESQUERDA: DOCTOR DOOM -->
             <div class="hidden lg:block lg:col-span-3 bg-slate-900/80 border border-emerald-900/50 rounded-2xl p-4 text-center backdrop-blur-md shadow-xl sticky top-6">
                 <div class="w-full h-80 rounded-xl overflow-hidden mb-3 border border-emerald-700/40 shadow-lg">
-                    <img src="https://images.unsplash.com/photo-1579783902614-a3fb3927b675?q=80&w=600&auto=format&fit=crop" alt="Doctor Doom" class="w-full h-full object-cover object-top">
+                    <img src="https://i.ibb.co/37r82r5/doctor-doom.jpg" alt="Doctor Doom" class="w-full h-full object-cover object-top" onerror="this.src='https://images.unsplash.com/photo-1579783902614-a3fb3927b675?q=80&w=600&auto=format&fit=crop'">
                 </div>
                 <h3 class="text-sm font-bold text-emerald-400 uppercase tracking-wider">Doctor Doom</h3>
                 <p class="text-xs text-slate-400 mt-1">O soberano da Latvéria comanda o Multiverso.</p>
@@ -273,100 +273,4 @@
             { phase: "", date: "29/Nov", title: "Agatha Desde Sempre (Ep. 4 a 6)" },
             { phase: "", date: "30/Nov", title: "Agatha Desde Sempre (Ep. 7 a 9)" },
             { phase: "", date: "01/Dez", title: "Filme: Deadpool & Wolverine" },
-            { phase: "", date: "02/Dez", title: "Filme: Capitão América 4" },
-            { phase: "", date: "03/Dez", title: "Demolidor: Renascido (Ep. 1 a 3)" },
-
-            { phase: "FASE 4: Grupos vs Doom", date: "05/Dez", title: "Demolidor: Renascido (Ep. 4 a 6)" },
-            { phase: "", date: "06/Dez", title: "Demolidor: Renascido (Ep. 7 a 9)" },
-            { phase: "", date: "07/Dez", title: "Filme: Thunderbolts*" },
-            { phase: "", date: "08/Dez", title: "Filme: Quarteto Fantástico" },
-            { phase: "", date: "09/Dez", title: "Coração de Ferro (Ep. 1 a 3)" },
-            { phase: "", date: "10/Dez", title: "Coração de Ferro (Ep. 4 a 6)" },
-
-            { phase: "FASE 5: Reta Final", date: "12/Dez", title: "VisionQuest (Ep. 1 a 3)" },
-            { phase: "", date: "13/Dez", title: "VisionQuest (Ep. 4 a 6)" },
-            { phase: "", date: "14/Dez", title: "VisionQuest (Ep. 7 a 9)" },
-            { phase: "", date: "17/Dez", title: "ESTREIA: AVENGERS: DOOMSDAY" }
-        ];
-
-        function loadTable() {
-            const tbody = document.getElementById('checklist-body');
-            tbody.innerHTML = '';
-
-            items.forEach((item, index) => {
-                let caiqueChecked = localStorage.getItem(`caique_${index}`) === 'true';
-                let carinaChecked = localStorage.getItem(`carina_${index}`) === 'true';
-
-                let tr = document.createElement('tr');
-                tr.id = `row-${index}`;
-                tr.className = `spell-glow hover:bg-slate-800/40 transition ${(caiqueChecked || carinaChecked) ? 'checked-effect' : ''}`;
-                
-                tr.innerHTML = `
-                    <td class="p-2.5 font-semibold text-xs text-emerald-400">${item.phase}</td>
-                    <td class="p-2.5 text-center text-slate-400 text-xs">${item.date}</td>
-                    <td class="p-2.5 text-slate-200">${item.title}</td>
-                    <td class="p-2.5 text-center">
-                        <input type="checkbox" class="checkbox-caique" ${caiqueChecked ? 'checked' : ''} onchange="saveProgress(event, ${index}, 'caique', this.checked)">
-                    </td>
-                    <td class="p-2.5 text-center">
-                        <input type="checkbox" class="checkbox-carina" ${carinaChecked ? 'checked' : ''} onchange="saveProgress(event, ${index}, 'carina', this.checked)">
-                    </td>
-                `;
-                tbody.appendChild(tr);
-            });
-            updateProgress();
-        }
-
-        function saveProgress(e, index, user, status) {
-            localStorage.setItem(`${user}_${index}`, status);
-            
-            if (status) triggerSpellEffect(e, user);
-
-            let caiqueChecked = localStorage.getItem(`caique_${index}`) === 'true';
-            let carinaChecked = localStorage.getItem(`carina_${index}`) === 'true';
-            let row = document.getElementById(`row-${index}`);
-            
-            if(caiqueChecked || carinaChecked) {
-                row.classList.add('checked-effect');
-            } else {
-                row.classList.remove('checked-effect');
-            }
-
-            updateProgress();
-        }
-
-        function manualSave() {
-            alert("✨ Progresso salvo com sucesso neste aparelho!");
-        }
-
-        function updateProgress() {
-            let total = items.length;
-            let caiqueDone = 0;
-            let carinaDone = 0;
-
-            items.forEach((_, index) => {
-                if(localStorage.getItem(`caique_${index}`) === 'true') caiqueDone++;
-                if(localStorage.getItem(`carina_${index}`) === 'true') carinaDone++;
-            });
-
-            let cPct = Math.round((caiqueDone / total) * 100);
-            let carPct = Math.round((carinaDone / total) * 100);
-
-            document.getElementById('caique-pct').innerText = cPct + '%';
-            document.getElementById('caique-bar').style.width = cPct + '%';
-
-            document.getElementById('carina-pct').innerText = carPct + '%';
-            document.getElementById('carina-bar').style.width = carPct + '%';
-        }
-
-        function resetData() {
-            if(confirm("Deseja apagar todas as marcações?")) {
-                localStorage.clear();
-                loadTable();
-            }
-        }
-
-        loadTable();
-    </script>
-</body>
-</html>
+            { phase: "", date: "02/De
