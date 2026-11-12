@@ -14,21 +14,36 @@
             background-position: center;
             background-attachment: fixed;
         }
-        .auth-card {
-            background: linear-gradient(180deg, rgba(15, 23, 42, 0.96) 0%, rgba(3, 7, 6, 0.99) 100%);
+
+        /* Fundo da tela de login com o GIF da Feiticeira Escarlate */
+        #auth-screen {
+            background-image: linear-gradient(to bottom, rgba(2, 6, 23, 0.78), rgba(2, 6, 23, 0.88)),
+                              url('feiticeira-bg.gif');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
         }
+
+        .auth-card {
+            background: linear-gradient(180deg, rgba(15, 23, 42, 0.92) 0%, rgba(3, 7, 6, 0.96) 100%);
+        }
+
+        /* Checkbox do Caique (Verde) */
         .checkbox-caique { 
             width: 1.4rem; 
             height: 1.4rem; 
             accent-color: #10b981; 
             cursor: pointer; 
         }
+
+        /* Checkbox da Carina (Vermelho Feiticeira Escarlate) */
         .checkbox-carina { 
             width: 1.4rem; 
             height: 1.4rem; 
             accent-color: #e11d48; 
             cursor: pointer; 
         }
+
         .spell-glow {
             transition: all 0.4s ease-in-out;
         }
@@ -40,6 +55,8 @@
         .checked-effect td {
             color: #d1fae5 !important;
         }
+
+        /* Partícula mágica do Caique (Verde) */
         .spell-spark-caique {
             position: fixed;
             pointer-events: none;
@@ -51,6 +68,8 @@
             z-index: 9999;
             animation: spark-fade 0.8s ease-out forwards;
         }
+
+        /* Partícula mágica da Carina (Vermelho Feiticeira Escarlate) */
         .spell-spark-carina {
             position: fixed;
             pointer-events: none;
@@ -62,13 +81,14 @@
             z-index: 9999;
             animation: spark-fade 0.8s ease-out forwards;
         }
+
         @keyframes spark-fade {
             0% { opacity: 1; transform: scale(1) translate(0, 0); }
             100% { opacity: 0; transform: scale(0.2) translate(var(--tx), var(--ty)); }
         }
     </style>
 
-    <!-- FUNÇÃO DE LOGIN NO TOPO PARA NUNCA FALHAR -->
+    <!-- FUNÇÃO DE LOGIN -->
     <script>
         const SECRET_PASSWORD = "mamãetaon";
 
@@ -111,9 +131,9 @@
 </head>
 <body class="text-slate-100 min-h-screen font-sans selection:bg-emerald-500 selection:text-black pb-16">
 
-    <!-- TELA DE LOGIN PRIVADA -->
-    <div id="auth-screen" class="fixed inset-0 bg-slate-950/95 backdrop-blur-md z-50 flex items-center justify-center p-4">
-        <div class="auth-card border border-rose-900/60 rounded-3xl max-w-sm w-full shadow-2xl text-center relative overflow-hidden p-6">
+    <!-- TELA DE LOGIN PRIVADA COM GIF NO FUNDO -->
+    <div id="auth-screen" class="fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div class="auth-card backdrop-blur-md border border-rose-900/60 rounded-3xl max-w-sm w-full shadow-2xl text-center relative overflow-hidden p-6">
             <div class="relative w-32 h-32 mx-auto mb-4 rounded-full overflow-hidden border-2 border-rose-600 shadow-[0_0_25px_rgba(225,29,72,0.7)]">
                 <img src="feiticeira.png" alt="Feiticeira Escarlate" class="w-full h-full object-cover object-top">
             </div>
@@ -218,6 +238,7 @@
         </div>
     </div>
 
+    <!-- SCRIPT DA TABELA E CHECKBOXES -->
     <script>
         function triggerSpellEffect(e, user) {
             playSpellSound(user);
