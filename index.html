@@ -123,6 +123,7 @@
                 playSpellSound('caique');
                 document.getElementById('auth-screen').style.display = 'none';
                 document.getElementById('app-content').classList.remove('opacity-0');
+                initSync(); // Inicia o carregamento e resgate automático da nuvem
             } else {
                 errorMsg.classList.remove('hidden');
             }
@@ -151,18 +152,26 @@
     <!-- PAINEL PRINCIPAL -->
     <div id="app-content" class="opacity-0 transition-opacity duration-700 max-w-6xl mx-auto px-4 pt-6">
         
-        <!-- Header com Botão de Salvar -->
+        <!-- Header com Status da Nuvem e Botão de Salvar -->
         <header class="text-center mb-6 bg-slate-900/80 border border-emerald-900/60 p-5 rounded-2xl backdrop-blur-md shadow-2xl relative overflow-hidden flex flex-col sm:flex-row items-center justify-between gap-4">
             <div class="text-center sm:text-left">
-                <span class="text-xs uppercase tracking-widest text-emerald-400 font-semibold">Cronograma de Acompanhamento MCU</span>
+                <div class="flex items-center justify-center sm:justify-start gap-2">
+                    <span class="text-xs uppercase tracking-widest text-emerald-400 font-semibold">Cronograma de Acompanhamento MCU</span>
+                    <span id="sync-status" class="text-[11px] bg-slate-800 text-slate-300 border border-slate-700 px-2 py-0.5 rounded-full">Aguardando...</span>
+                </div>
                 <h1 class="text-2xl md:text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-teal-200 to-emerald-500 mt-1">
                     AVENGERS: DOOMSDAY
                 </h1>
                 <p class="text-xs text-slate-300 mt-1">Caique & Carina | Estreia: 17/12/2026</p>
             </div>
-            <button type="button" onclick="manualSave()" class="bg-gradient-to-r from-emerald-600 to-teal-600 hover:opacity-90 text-white text-xs font-bold px-4 py-2.5 rounded-xl shadow-lg transition cursor-pointer border border-emerald-400/30 flex items-center gap-2">
-                💾 Salvar Progresso
-            </button>
+            <div class="flex gap-2">
+                <button type="button" onclick="fetchCloudData(true)" class="bg-slate-800 hover:bg-slate-700 text-emerald-300 text-xs font-bold px-3 py-2.5 rounded-xl shadow-lg transition cursor-pointer border border-emerald-800/40">
+                    🔄 Atualizar
+                </button>
+                <button type="button" onclick="manualSave()" class="bg-gradient-to-r from-emerald-600 to-teal-600 hover:opacity-90 text-white text-xs font-bold px-4 py-2.5 rounded-xl shadow-lg transition cursor-pointer border border-emerald-400/30 flex items-center gap-2">
+                    💾 Salvar Progresso
+                </button>
+            </div>
         </header>
 
         <!-- Container Flexível: Doctor Doom | Tabela | Bruxas -->
@@ -222,7 +231,7 @@
                 </div>
 
                 <div class="text-center">
-                    <button type="button" onclick="resetData()" class="text-xs text-slate-500 hover:text-emerald-400 transition underline">Zerar marcações</button>
+                    <button type="button" onclick="resetData()" class="text-xs text-slate-500 hover:text-emerald-400 transition underline cursor-pointer">Zerar marcações</button>
                 </div>
             </div>
 
@@ -238,8 +247,20 @@
         </div>
     </div>
 
-    <!-- SCRIPT DA TABELA E CHECKBOXES -->
+    <!-- SCRIPT DA TABELA, NUVEM E RESGATE -->
     <script>
+        // ============================================================
+        // COLE SUAS CHAVES DO JSONBIN.IO AQUI PARA ATIVAR A NUVEM:
+        const BIN_ID = "COLE_SEU_BIN_ID_AQUI";
+        const API_KEY = "COLE_SUA_MASTER_KEY_AQUI";
+        // ============================================================
+
+        let cloudState = { caique: [], carina: [] };
+
+        function isCloudConfigured() {
+            return BIN_ID !== "COLE_SEU_BIN_ID_AQUI" && API_KEY !== "COLE_SUA_MASTER_KEY_AQUI" && BIN_ID.trim() !== "" && API_KEY.trim() !== "";
+        }
+
         function triggerSpellEffect(e, user) {
             playSpellSound(user);
             const x = e.clientX || window.innerWidth / 2;
@@ -296,14 +317,117 @@
             { phase: "", date: "17/Dez", title: "ESTREIA: AVENGERS: DOOMSDAY" }
         ];
 
-        function loadTable() {
+        // Lê os dados que estavam salvos localmente no navegador antes
+        function getLocalBackup() {
+            let localCaique = [];
+            let localCarina = [];
+            items.forEach((_, index) => {
+                if (localStorage.getItem(`caique_${index}`) === 'true') localCaique.push(index);
+                if (localStorage.getItem(`carina_${index}`) === 'true') localCarina.push(index);
+            });
+            return { caique: localCaique, carina: localCarina };
+        }
+
+        // Espelha os dados da nuvem no navegador local como backup de segurança
+        function saveLocalBackup() {
+            items.forEach((_, index) => {
+                localStorage.setItem(`caique_${index}`, cloudState.caique.includes(index));
+                localStorage.setItem(`carina_${index}`, cloudState.carina.includes(index));
+            });
+        }
+
+        async function initSync() {
+            const localData = getLocalBackup();
+            cloudState = localData;
+            renderTable();
+
+            if (!isCloudConfigured()) {
+                const badge = document.getElementById('sync-status');
+                badge.innerText = "⚠️ Modo Local (Configure o JSONBin)";
+                badge.className = "text-[11px] bg-amber-950 text-amber-300 border border-amber-700/50 px-2 py-0.5 rounded-full";
+                return;
+            }
+
+            await fetchCloudData(false, localData);
+        }
+
+        async function fetchCloudData(showAlert = false, localDataToMerge = null) {
+            const badge = document.getElementById('sync-status');
+            if (!isCloudConfigured()) {
+                if (showAlert) alert("⚠️ Preencha o BIN_ID e a API_KEY no código HTML para sincronizar na nuvem!");
+                return;
+            }
+
+            badge.innerText = "Sincronizando...";
+            try {
+                const res = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}/latest`, {
+                    headers: { 'X-Master-Key': API_KEY }
+                });
+                const json = await res.json();
+                
+                let serverCaique = (json.record && json.record.caique) ? json.record.caique : [];
+                let serverCarina = (json.record && json.record.carina) ? json.record.carina : [];
+
+                // RESGATE AUTOMÁTICO: Mescla dados locais antigos que ainda não estavam na nuvem
+                let needsPush = false;
+                if (localDataToMerge) {
+                    localDataToMerge.caique.forEach(idx => {
+                        if (!serverCaique.includes(idx)) { serverCaique.push(idx); needsPush = true; }
+                    });
+                    localDataToMerge.carina.forEach(idx => {
+                        if (!serverCarina.includes(idx)) { serverCarina.push(idx); needsPush = true; }
+                    });
+                }
+
+                cloudState = { caique: serverCaique, carina: serverCarina };
+                saveLocalBackup();
+                renderTable();
+
+                if (needsPush) {
+                    await pushCloudData();
+                } else {
+                    badge.innerText = "☁️ Online";
+                    badge.className = "text-[11px] bg-emerald-950 text-emerald-300 border border-emerald-700/50 px-2 py-0.5 rounded-full";
+                }
+
+                if (showAlert) alert("🔄 Sincronizado com a nuvem!");
+            } catch (err) {
+                badge.innerText = "⚠️ Erro de Rede";
+            }
+        }
+
+        async function pushCloudData() {
+            saveLocalBackup();
+            if (!isCloudConfigured()) return false;
+
+            const badge = document.getElementById('sync-status');
+            badge.innerText = "Salvando...";
+            try {
+                await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Master-Key': API_KEY
+                    },
+                    body: JSON.stringify(cloudState)
+                });
+                badge.innerText = "☁️ Salvo na Nuvem";
+                badge.className = "text-[11px] bg-emerald-950 text-emerald-300 border border-emerald-700/50 px-2 py-0.5 rounded-full";
+                return true;
+            } catch (err) {
+                badge.innerText = "⚠️ Falha ao Salvar";
+                return false;
+            }
+        }
+
+        function renderTable() {
             const tbody = document.getElementById('checklist-body');
             if (!tbody) return;
             tbody.innerHTML = '';
 
             items.forEach((item, index) => {
-                let caiqueChecked = localStorage.getItem(`caique_${index}`) === 'true';
-                let carinaChecked = localStorage.getItem(`carina_${index}`) === 'true';
+                let caiqueChecked = cloudState.caique.includes(index);
+                let carinaChecked = cloudState.carina.includes(index);
 
                 let tr = document.createElement('tr');
                 tr.id = `row-${index}`;
@@ -326,38 +450,41 @@
         }
 
         function saveProgress(e, index, user, status) {
-            localStorage.setItem(`${user}_${index}`, status);
-            if (status) triggerSpellEffect(e, user);
+            if (status) {
+                triggerSpellEffect(e, user);
+                if (!cloudState[user].includes(index)) cloudState[user].push(index);
+            } else {
+                cloudState[user] = cloudState[user].filter(i => i !== index);
+            }
 
-            let caiqueChecked = localStorage.getItem(`caique_${index}`) === 'true';
-            let carinaChecked = localStorage.getItem(`carina_${index}`) === 'true';
             let row = document.getElementById(`row-${index}`);
-            
-            if (caiqueChecked || carinaChecked) {
+            if (cloudState.caique.includes(index) || cloudState.carina.includes(index)) {
                 row.classList.add('checked-effect');
             } else {
                 row.classList.remove('checked-effect');
             }
 
             updateProgress();
+            pushCloudData(); // Salva automaticamente na nuvem ao clicar
         }
 
-        function manualSave() {
-            alert("✨ Progresso salvo com sucesso neste aparelho!");
+        async function manualSave() {
+            if (!isCloudConfigured()) {
+                alert("⚠️ Atenção: Você ainda não colocou o BIN_ID e a API_KEY do JSONBin no código. Por enquanto está salvo apenas neste aparelho!");
+                return;
+            }
+            const ok = await pushCloudData();
+            if (ok) {
+                alert("☁️✨ Progresso salvo e sincronizado na nuvem com sucesso!");
+            } else {
+                alert("⚠️ Erro ao conectar com a nuvem. Verifique sua internet ou suas chaves do JSONBin.");
+            }
         }
 
         function updateProgress() {
             let total = items.length;
-            let caiqueDone = 0;
-            let carinaDone = 0;
-
-            items.forEach((_, index) => {
-                if (localStorage.getItem(`caique_${index}`) === 'true') caiqueDone++;
-                if (localStorage.getItem(`carina_${index}`) === 'true') carinaDone++;
-            });
-
-            let cPct = Math.round((caiqueDone / total) * 100);
-            let carPct = Math.round((carinaDone / total) * 100);
+            let cPct = Math.round((cloudState.caique.length / total) * 100);
+            let carPct = Math.round((cloudState.carina.length / total) * 100);
 
             document.getElementById('caique-pct').innerText = cPct + '%';
             document.getElementById('caique-bar').style.width = cPct + '%';
@@ -367,13 +494,18 @@
         }
 
         function resetData() {
-            if (confirm("Deseja apagar todas as marcações?")) {
+            if (confirm("Deseja apagar todas as marcações (inclusive na nuvem)?")) {
                 localStorage.clear();
-                loadTable();
+                cloudState = { caique: [], carina: [] };
+                renderTable();
+                pushCloudData();
             }
         }
 
-        document.addEventListener('DOMContentLoaded', loadTable);
+        document.addEventListener('DOMContentLoaded', () => {
+            cloudState = getLocalBackup();
+            renderTable();
+        });
     </script>
 </body>
 </html>
